@@ -3,9 +3,10 @@ mkdir databases
 touch .error
 RED="\e[31m"
 GREEN="\e[32m"
-BLUE="\e[33m"
-YELLO="\e[34m"
+BLUE="\e[34m"
+YELLO="\e[33m"
 ENDCOLOR="\e[0m"
+CYAN="\e[96m"
 function dbMenu {
   echo -e "\n*-------DB Menu--------*"
   echo -e " ${GREEN}| 1. Select Database |${ENDCOLOR} "
@@ -15,10 +16,12 @@ function dbMenu {
   echo -e " ${GREEN}| 5. Show Database   |${ENDCOLOR} "
   echo -e " ${GREEN}| 6. Exit            |${ENDCOLOR} "
   echo -e "*----------------------*"
-  echo -e "Enter Choice: \c"                            
+  echo -e "${CYAN}Enter YOUR Choice: ${ENDCOLOR}\c"                            
   read ch
   case $ch in
     1)  selectDB ;;
+    2)  createDB ;;
+
     # 2)  createDB ;;
     # 3)  renameDB ;;
     # 4)  dropDB ;;
@@ -32,17 +35,37 @@ function dbMenu {
 
 function selectDB {
 
- echo -e "Enter Database Name: \c"
+ echo -e "${CYAN}Enter Database Name${ENDCOLOR}: \c"
   read dbName
   cd ./databases/$dbName 2>>./.error
   if [[ $? == 0 ]]; then
-    echo "Database $dbName was Successfully Selected"
+    echo -e "\n${BLUE}Database${ENDCOLOR} $dbName ${BLUE}was Successfully Selected${ENDCOLOR}"
     echo "tablesMenu"
   else
-    echo "Database $dbName wasn't found"
+    echo -e "\n${RED}Database${ENDCOLOR} ${YELLO}$dbName${ENDCOLOR} ${RED}wasn't found${ENDCOLOR}\n"
     dbMenu
   fi
 }
 
-
+#---------------- create database function with validation ---------------#
+function createDB {
+    echo -e "${CYAN}Enter Database Name : ${ENDCOLOR} \c"
+    read dbName
+    clear
+    if [[ ! $dbName =~ ^[a-zA-Z]+[a-zA-Z0-9]*$ ]]
+    then
+        echo -e "${RED}not a valid database name${ENDCOLOR}"
+        createDB
+    else
+        if [ -d ./databases/$dbName ]
+        then
+            echo -e "${YELLO}already exists please try again${ENDCOLOR}"
+            createDB
+        else
+            mkdir ./databases/$dbName
+                echo -e "$dbName ${BLUE} db created successfully ${ENDCOLOR}"
+                dbMenu
+        fi
+    fi
+}
 dbMenu
