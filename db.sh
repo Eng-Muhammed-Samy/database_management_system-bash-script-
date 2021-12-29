@@ -21,6 +21,8 @@ function dbMenu {
   case $ch in
     1)  selectDB ;;
     2)  createDB ;;
+
+    # 2)  createDB ;;
     # 3)  renameDB ;;
     # 4)  dropDB ;;
     # 5)  ls ./DBMS ; dbMenu;;
