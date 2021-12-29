@@ -1,5 +1,9 @@
 #!/bin/bash
-mkdir databases
+if [[ ! -d ./databases ]]
+then
+    mkdir ./databases
+fi
+
 touch .error
 RED="\e[31m"
 GREEN="\e[32m"
@@ -22,10 +26,10 @@ function dbMenu {
     1)  selectDB ;; 
     2)  createDB ;;
     3)  renameDB ;;
-    # 4)  dropDB ;;
-    # 5)  ls ./DBMS ; dbMenu;;
-    # 6) exit ;;
-    # *) echo -e "${RED} Wrong Choice ${ENDCOLOR}" ; dbMenu;
+    4)  dropDB ;;
+    5)  ls ./databases ; dbMenu;;
+    6) exit ;;
+    *) echo -e "${RED} Wrong Choice ${ENDCOLOR}" ; dbMenu;
   esac
 }
 
@@ -86,7 +90,9 @@ function renameDB {
         done
         mv ./databases/$dbName ./databases/$newName 2>>./.error
         if [[ $? == 0 ]]; then
-            echo -e "${BLUE}Database Renamed Successfully${ENDCOLOR}"
+
+            echo -e "${BLUE}Database${ENDCOLOR} ${YELLO} $dbName ${ENDCOLOR} ${BLUE}Renamed to${ENDCOLOR} ${YELLO} $newName ${ENDCOLOR} ${BLUE}Successfully${ENDCOLOR}"
+
         else
             echo -e "${RED}Error in Renaming Database${ENDCOLOR}"
             renameDB
@@ -95,6 +101,20 @@ function renameDB {
 
    echo -e "${YELLO}$dbName${ENDCOLOR}${RED} database doesnot exist please try again${ENDCOLOR}"
    renameDB
+  fi
+  dbMenu
+}
+
+#------------------ Drop database function -----------------#
+function dropDB {
+  echo -e "${CYAN}Enter Database Name:${ENDCOLOR} \c"
+  read dbName
+  rm -r ./databases/$dbName 2>>./.error
+  if [[ $? == 0 ]]
+  then
+    echo -e "${BLUE}Database${ENDCOLOR} ${YELLO} $dbName ${ENDCOLOR} ${BLUE}Dropped Successfully${ENDCOLOR}"
+  else
+    echo -e "${RED}Database Not found${ENDCOLOR}"
   fi
   dbMenu
 }
