@@ -28,8 +28,8 @@ function dbMenu {
     3)  renameDB ;;
     4)  dropDB ;;
     5)  ls ./databases ; dbMenu;;
-    # 6) exit ;;
-    # *) echo -e "${RED} Wrong Choice ${ENDCOLOR}" ; dbMenu;
+    6) exit ;;
+    *) echo -e "${RED} Wrong Choice ${ENDCOLOR}" ; dbMenu;
   esac
 }
 
@@ -49,6 +49,7 @@ function selectDB {
     dbMenu
   fi
 }
+
 
 #---------------- create database function with validation ---------------#
 function createDB {
@@ -89,7 +90,9 @@ function renameDB {
         done
         mv ./databases/$dbName ./databases/$newName 2>>./.error
         if [[ $? == 0 ]]; then
+
             echo -e "${BLUE}Database${ENDCOLOR} ${YELLO} $dbName ${ENDCOLOR} ${BLUE}Renamed to${ENDCOLOR} ${YELLO} $newName ${ENDCOLOR} ${BLUE}Successfully${ENDCOLOR}"
+
         else
             echo -e "${RED}Error in Renaming Database${ENDCOLOR}"
             renameDB
