@@ -11,6 +11,8 @@ BLUE="\e[34m"
 YELLO="\e[33m"
 ENDCOLOR="\e[0m"
 CYAN="\e[96m"
+
+#---------------------- database menu----------------------#
 function dbMenu {
   echo -e "\n*-------DB Menu--------*"
   echo -e " ${GREEN}| 1. Select Database |${ENDCOLOR} "
@@ -43,7 +45,7 @@ function selectDB {
   cd ./databases/$dbName 2>>./.error
   if [[ $? == 0 ]]; then
     echo -e "\n${BLUE}Database${ENDCOLOR} $dbName ${BLUE}was Successfully Selected${ENDCOLOR}"
-    echo "tablesMenu"
+    ../../table.sh
   else
     echo -e "\n${RED}Database${ENDCOLOR} ${YELLO}$dbName${ENDCOLOR} ${RED}wasn't found${ENDCOLOR}\n"
     dbMenu
