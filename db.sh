@@ -1,5 +1,9 @@
 #!/bin/bash
-mkdir databases
+if [[ ! -d ./databases ]]
+then
+    mkdir ./databases
+fi
+
 touch .error
 RED="\e[31m"
 GREEN="\e[32m"
@@ -7,6 +11,8 @@ BLUE="\e[34m"
 YELLO="\e[33m"
 ENDCOLOR="\e[0m"
 CYAN="\e[96m"
+
+#---------------------- database menu----------------------#
 function dbMenu {
   echo -e "\n*-------DB Menu--------*"
   echo -e " ${GREEN}| 1. Select Database |${ENDCOLOR} "
@@ -22,10 +28,10 @@ function dbMenu {
     1)  selectDB ;; 
     2)  createDB ;;
     3)  renameDB ;;
-    # 4)  dropDB ;;
-    # 5)  ls ./DBMS ; dbMenu;;
-    # 6) exit ;;
-    # *) echo -e "${RED} Wrong Choice ${ENDCOLOR}" ; dbMenu;
+    4)  dropDB ;;
+    5)  ls ./databases ; dbMenu;;
+    6) exit ;;
+    *) echo -e "${RED} Wrong Choice ${ENDCOLOR}" ; dbMenu;
   esac
 }
 
@@ -39,7 +45,7 @@ function selectDB {
   cd ./databases/$dbName 2>>./.error
   if [[ $? == 0 ]]; then
     echo -e "\n${BLUE}Database${ENDCOLOR} $dbName ${BLUE}was Successfully Selected${ENDCOLOR}"
-    echo "tablesMenu"
+    ../../table.sh
   else
     echo -e "\n${RED}Database${ENDCOLOR} ${YELLO}$dbName${ENDCOLOR} ${RED}wasn't found${ENDCOLOR}\n"
     dbMenu
@@ -86,7 +92,9 @@ function renameDB {
         done
         mv ./databases/$dbName ./databases/$newName 2>>./.error
         if [[ $? == 0 ]]; then
-            echo -e "${BLUE}Database Renamed Successfully${ENDCOLOR}"
+
+            echo -e "${BLUE}Database${ENDCOLOR} ${YELLO} $dbName ${ENDCOLOR} ${BLUE}Renamed to${ENDCOLOR} ${YELLO} $newName ${ENDCOLOR} ${BLUE}Successfully${ENDCOLOR}"
+
         else
             echo -e "${RED}Error in Renaming Database${ENDCOLOR}"
             renameDB
@@ -96,6 +104,31 @@ function renameDB {
    echo -e "${YELLO}$dbName${ENDCOLOR}${RED} database doesnot exist please try again${ENDCOLOR}"
    renameDB
   fi
+  dbMenu
+}
+
+#------------------ Drop database function -----------------#
+function dropDB {
+  echo -e "${CYAN}Enter Database Name:${ENDCOLOR} \c"
+  read dbName
+
+  if [[ -d ./databases/$dbName ]] 
+    then
+         echo -e "${YELLO}are you sure to drop${ENDCOLOR} ${RED}$dbName${ENDCOLOR} ? [y, n]"
+        read ch
+        if [[ $ch =~ ^[yY]+[a-zA-Z]*$ ]]
+        then
+            rm -r ./databases/$dbName 2>>./.error
+            if [[ $? == 0 ]]
+            then
+                echo -e "${BLUE}Database${ENDCOLOR} ${YELLO} $dbName ${ENDCOLOR} ${BLUE}Dropped Successfully${ENDCOLOR}"
+            fi
+        else 
+            echo -e "${BLUE}delete is canceld${ENDCOLOR}"
+        fi
+    else
+        echo -e "${RED}Database Not found${ENDCOLOR}"
+    fi
   dbMenu
 }
 
