@@ -109,13 +109,24 @@ function renameDB {
 function dropDB {
   echo -e "${CYAN}Enter Database Name:${ENDCOLOR} \c"
   read dbName
-  rm -r ./databases/$dbName 2>>./.error
-  if [[ $? == 0 ]]
-  then
-    echo -e "${BLUE}Database${ENDCOLOR} ${YELLO} $dbName ${ENDCOLOR} ${BLUE}Dropped Successfully${ENDCOLOR}"
-  else
-    echo -e "${RED}Database Not found${ENDCOLOR}"
-  fi
+
+  if [[ -d ./databases/$dbName ]] 
+    then
+         echo -e "${YELLO}are you sure to drop${ENDCOLOR} ${RED}$dbName${ENDCOLOR} ? [y, n]"
+        read ch
+        if [[ $ch =~ ^[yY]+[a-zA-Z]*$ ]]
+        then
+            rm -r ./databases/$dbName 2>>./.error
+            if [[ $? == 0 ]]
+            then
+                echo -e "${BLUE}Database${ENDCOLOR} ${YELLO} $dbName ${ENDCOLOR} ${BLUE}Dropped Successfully${ENDCOLOR}"
+            fi
+        else 
+            echo -e "${BLUE}delete is canceld${ENDCOLOR}"
+        fi
+    else
+        echo -e "${RED}Database Not found${ENDCOLOR}"
+    fi
   dbMenu
 }
 
