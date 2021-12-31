@@ -24,7 +24,7 @@ echo -e "${CYAN}Enter Choice:${ENDCOLOR} \c"
   case $ch in
     1)  ls -I '*.*'; tableFunctionalities ;;
     2)  createTable ;;
-    #3)  insert;;
+    3)  insert;;
     #4)  clear; selectMenu ;;
     #5)  updateTable;;
     #6)  deleteFromTable;;
@@ -88,7 +88,7 @@ function createTable {
 #-----------------------------append columns name and types in their files------#
           if [[ i -eq cols_num ]]; then
             echo  $col_name >>./$tableName;
-            echo  $col_name >> ./$tableName.ct;
+            echo  $col_type >> ./$tableName.ct;
 
           else
             echo -n $col_name":" >> ./$tableName;
@@ -100,10 +100,57 @@ function createTable {
   fi    
   tableFunctionalities
 }
+#--------------------------- create insert functon --------------------#
+function insert {
 
+
+  echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
+  ls -I '*.*';
+  echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
+  read tableName
+  if [[ -f ./$tableName ]]
+  then
+    typeset -i nf=`awk -F: '{if(NR==1){print NF}}' ./$tableName;`
+    
+    for (( i = 1; i <= $nf; i++ ))
+    do
+      col_name=`awk -F: -v"i=$i" '{if(NR==1){print $i}}' ./$tableName;`
+      col_type=`awk -F: -v"i=$i" '{if(NR==1){print $i}}' ./$tableName.ct;`
+      flag=0;
+      while [[ $flag -eq 0 ]]
+       do
+        echo -e "${CYAN}Enter $col_name :${ENDCOLOR} \c" ;
+        read col_value;
+  
+        if [[ ( $col_type = "int" && "$col_value" = +([0-9]) ) || ( $col_type = "string" && "$col_value" = +([a-zA-Z]) ) ]]; then
+          if [[ $i != $nf ]]; then
+            echo -n $col_value":" >> ./$tableName;
+          else	
+            echo $col_value >> ./$tableName;
+          fi
+          flag=1;
+        fi
+      done
+    done
+    
+  else
+    echo "$tableName doesn't exist";
+  fi
+
+
+tableFunctionalities
+}
+
+
+
+
+
+
+
+#---------------------------- create drop table function -------------------#
 function dropTable 
 {
-  echo "Available tables are"
+  echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
   ls -I '*.*';
   echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
    read tableName
