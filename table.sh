@@ -71,20 +71,52 @@ function createTable {
         do
           echo -e "${CYAN}Enter column $i name :${ENDCOLOR} \c" ;
           read col_name;
-           while [[ ! $col_name =~  ^[a-zA-Z]+[a-zA-Z0-9]*$ ]] || [[ $col_name == '' ]]
-           do
-                echo -e "${RED}Not a Valid Name for column${ENDCOLOR}"; 
-                read col_name;
-           done   
-          echo -e "${CYAN}Enter column datatype :${ENDCOLOR} ${YELLO}[string/int]${ENDCOLOR} : \c";
-          read  col_type;
-#-------------------- check type entered correctly----------#
+
+
+          flag=0;
+          typeset -i nf=`awk -F: '{if(NR==1){print NF}}' ./$tableName`;
+     
+    #------------------ask user for column type----------------------#
+       echo -e "${CYAN}Enter column datatype :${ENDCOLOR} ${YELLO}[string/int]${ENDCOLOR} : \c";
+        read  col_type;
+      #-------------------- check type entered correctly----------#
           while [[ "$col_type" != *(int)*(string) || -z "$col_type" ]]
           do
             echo -e "${RED}Invalid datatype${ENDCOLOR}";
             echo -e "${CYAN}Enter column datatype :${ENDCOLOR} ${YELLO}[string/int]${ENDCOLOR} : \c";
             read  col_type;
           done
+           
+
+  #----------------------------- check if the column name is same with entered names------#
+      #    while [[ $flag -eq 0 ]]
+      #    do
+       
+      #     if [[ $nf -ne 0 ]]
+      #     then
+      #           for (( j = 1; j <= $nf; j++ ))
+      #           do
+      #               exist_colname=`awk -F: -v"i=$i" '{if(NR==1){print $i}}' ./$tableName;`
+      #               if [ "$col_name" == "$exist_colname" ]
+      #               then
+      #               echo -e "${RED}column name exists write another name${ENDCOLOR}";
+      #               echo -e "${CYAN}Enter column $i name :${ENDCOLOR} \c" ;
+      #               read col_name;
+      #               else
+      #                 flag=1;
+      #               fi
+      #           done
+      #     else
+      #         flag=1;
+      #     fi       
+      # done
+#----------------------- check valid name column------------#
+           while [[ ! $col_name =~  ^[a-zA-Z]+[a-zA-Z0-9]*$ ]] || [[ $col_name == '' ]]
+           do
+                echo -e "${RED}Not a Valid Name for column${ENDCOLOR}"; 
+                read col_name;
+          done  
+      
 #-----------------------------append columns name and types in their files------#
           if [[ i -eq cols_num ]]; then
             echo  $col_name >>./$tableName;
@@ -95,8 +127,8 @@ function createTable {
             echo -n $col_type":" >> ./$tableName.ct;
           fi
 
-        done
-        echo "$tbname has been created"
+    done
+      echo "$tableName has been created"
   fi    
   tableFunctionalities
 }
