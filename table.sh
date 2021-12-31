@@ -28,7 +28,7 @@ echo -e "${CYAN}Enter Choice:${ENDCOLOR} \c"
     #4)  clear; selectMenu ;;
     #5)  updateTable;;
     #6)  deleteFromTable;;
-    #7)  dropTable;;
+    7)  dropTable;;
     8) clear;cd ../../ ; ./db.sh 2>>./.error;;
     9) exit ;;
     *) echo -e "${RED} Wrong Choice ${ENDCOLOR}" tableFunctionalities;;
@@ -99,6 +99,37 @@ function createTable {
         echo "$tbname has been created"
   fi    
   tableFunctionalities
+}
+
+function dropTable 
+{
+  echo "Available tables are"
+  ls -I '*.*';
+  echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
+   read tableName
+  if [[ -f ./$tableName ]]
+  then
+    echo -e "${RED}Are you Sure You Want To drop${ENDCOLOR} ${YELLO}$tableName${ENDCOLOR} ${RED}table? y/n${ENDCOLOR}"
+    read choice;
+    case $choice in
+      [Yy]* ) 
+        rm ./$tableName
+        rm ./$tableName.ct
+        echo -e "${YELLO}$tableName ${ENDCOLOR} ${BLUE}has been deleted${ENDCOLOR}"
+        ;;
+      [Nn]* ) 
+        echo -e "${BLUE}Operation Canceled${ENDCOLOR}"
+        ;;
+      * ) 
+        echo -e "${BLUE}Invalid Input 0 tables effected${ENDCOLOR}"
+        ;;
+    esac
+  else
+    echo -e "${YELLO}$tableName ${ENDCOLOR} ${BLUE} doesn't exist${ENDCOLOR}"
+  fi
+
+tableFunctionalities
+
 }
 
 tableFunctionalities
