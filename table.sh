@@ -22,8 +22,8 @@ echo "+-------------------------------+"
 echo -e "${CYAN}Enter Choice:${ENDCOLOR} \c"
   read ch
   case $ch in
-    1)  ls .; tableFunctionalities ;;
-    #2)  createTable ;;
+    1)  ls -I '*.*'; tableFunctionalities ;;
+    2)  createTable ;;
     #3)  insert;;
     #4)  clear; selectMenu ;;
     #5)  updateTable;;
@@ -33,12 +33,72 @@ echo -e "${CYAN}Enter Choice:${ENDCOLOR} \c"
     9) exit ;;
     *) echo -e "${RED} Wrong Choice ${ENDCOLOR}" tableFunctionalities;;
   esac
-
-
 }
 
 
+#------------------- create table function ---------------------#
+function createTable {
+ #-------------- ask user to enter table name ---#
+   echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
+   read tableName
+   clear
+  #-------------- check valid table name -------#
+    if [[ ! $tableName =~  ^[a-zA-Z]+[a-zA-Z0-9]*$ ]] || [[ $tableName == '' ]]
+    then
+        echo -e "${RED}Not a Valid Name for Table${ENDCOLOR}"
+        createTable 
+    #-------------- check if table is exist---#
+    elif [[ -f ./$tableName ]]
+    then
+        echo -e "${YELLO}Table Already Exist${ENDCOLOR}"
+        createTable 
+    else
+      
+        touch ./$tableName
+  #------------ ask user for columns numbers ----------#
+        echo -e "${CYAN}Enter No of columns : ${ENDCOLOR} \c"
+        read cols_num
+ #---------------- check if colnum > 2-----------#
+        until [[ $cols_num =~ ^[2-9]+$ ]]
+        do
+            echo -e "${RED}Table Should Have at Least Two Column, String not allowed${ENDCOLOR}\c"
+            echo -e "${CYAN}Enter No of columns : ${ENDCOLOR} \c"
+            read cols_num
+            clear
+        done
+#--------------------- enter columns name and types------#
+        for (( i = 1; i <= cols_num; i++ )); 
+        do
+          echo -e "${CYAN}Enter column $i name :${ENDCOLOR} \c" ;
+          read col_name;
+           while [[ ! $col_name =~  ^[a-zA-Z]+[a-zA-Z0-9]*$ ]] || [[ $col_name == '' ]]
+           do
+                echo -e "${RED}Not a Valid Name for column${ENDCOLOR}"; 
+                read col_name;
+           done   
+          echo -e "${CYAN}Enter column datatype :${ENDCOLOR} ${YELLO}[string/int]${ENDCOLOR} : \c";
+          read  col_type;
+#-------------------- check type entered correctly----------#
+          while [[ "$col_type" != *(int)*(string) || -z "$col_type" ]]
+          do
+            echo -e "${RED}Invalid datatype${ENDCOLOR}";
+            echo -e "${CYAN}Enter column datatype :${ENDCOLOR} ${YELLO}[string/int]${ENDCOLOR} : \c";
+            read  col_type;
+          done
+#-----------------------------append columns name and types in their files------#
+          if [[ i -eq cols_num ]]; then
+            echo  $col_name >>./$tableName;
+            echo  $col_name >> ./$tableName.ct;
 
+          else
+            echo -n $col_name":" >> ./$tableName;
+            echo -n $col_type":" >> ./$tableName.ct;
+          fi
 
+        done
+        echo "$tbname has been created"
+  fi    
+  tableFunctionalities
+}
 
 tableFunctionalities
