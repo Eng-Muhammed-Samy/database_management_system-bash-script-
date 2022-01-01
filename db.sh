@@ -52,7 +52,6 @@ function selectDB {
   fi
 }
 
-
 #---------------- create database function with validation ---------------#
 function createDB {
     echo -e "${CYAN}Enter Database Name : ${ENDCOLOR} \c"
