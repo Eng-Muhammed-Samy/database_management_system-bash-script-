@@ -9,15 +9,17 @@ CYAN="\e[96m"
 #--------------- table menu --------------# 
 function tableFunctionalities {
 echo -e "\n+--------Tables Menu------------+"
-echo -e " ${GREEN}| 1. Show Existing Tables    |${ENDCOLOR} "
-echo -e " ${GREEN}| 2. Create New Table        |${ENDCOLOR} "
-echo -e " ${GREEN}| 3. Insert Into Table       |${ENDCOLOR} "
-echo -e " ${GREEN}| 4. Select From Table       |${ENDCOLOR} "
-echo -e " ${GREEN}| 5. Update Table            |${ENDCOLOR} "
-echo -e " ${GREEN}| 6. Delete From Table       |${ENDCOLOR} "
-echo -e " ${GREEN}| 7. Drop Table              |${ENDCOLOR} "
-echo -e " ${GREEN}| 8. Back To database Menu   |${ENDCOLOR} "
-echo -e " ${GREEN}| 9. Exit                    |${ENDCOLOR} "
+echo -e " ${GREEN}| 1. Show Existing Tables        |${ENDCOLOR} "
+echo -e " ${GREEN}| 2. Create New Table            |${ENDCOLOR} "
+echo -e " ${GREEN}| 3. Insert Into Table           |${ENDCOLOR} "
+echo -e " ${GREEN}| 4. Select All Rows From Table  |${ENDCOLOR} "
+echo -e " ${GREEN}| 5. Select column               |${ENDCOLOR} "
+echo -e " ${GREEN}| 6. Select With condition       |${ENDCOLOR} "
+echo -e " ${GREEN}| 7. Update Table                |${ENDCOLOR} "
+echo -e " ${GREEN}| 8. Delete From Table           |${ENDCOLOR} "
+echo -e " ${GREEN}| 9. Drop Table                  |${ENDCOLOR} "
+echo -e " ${GREEN}| 10. Back To database Menu      |${ENDCOLOR} "
+echo -e " ${GREEN}| 11. Exit                       |${ENDCOLOR} "
 echo "+-------------------------------+"
 echo -e "${CYAN}Enter Choice:${ENDCOLOR} \c"
   read ch
@@ -25,12 +27,14 @@ echo -e "${CYAN}Enter Choice:${ENDCOLOR} \c"
     1)  ls -I '*.*'; tableFunctionalities ;;
     2)  createTable ;;
     3)  insert;;
-    4)  clear; ../../selectFromTable.sh ;;
-    #5)  updateTable;;
-    6)  deleteFromTable;;
-    7)  dropTable;;
-    8) clear;cd ../../ ; ./db.sh 2>>./.error;;
-    9) exit ;;
+    4)  clear; selectAllRows;;
+    5)  clear; selectColoumn;;
+    6)  clear; allColumnsWithCondition;;
+    7)  updateTable;;
+    8)  deleteFromTable;;
+    9)  dropTable;;
+    10) clear;cd ../../ ; ./db.sh 2>>./.error;;
+    11) exit ;;
     *) echo -e "${RED} Wrong Choice ${ENDCOLOR}" tableFunctionalities;;
   esac
 }
@@ -94,16 +98,6 @@ function createTable {
           done
            
 
-      
-#-----------------------------append columns name and types in their files------#
-        if [[ i -eq cols_num ]]; then
-        echo  $col_name >> ./$tableName;
-        echo  $col_type >> ./$tableName.ct;
-
-        else
-        echo -n $col_name":" >> ./$tableName;
-        echo -n $col_type":" >> ./$tableName.ct;
-        fi
 #----------------------- check valid name column------------#
            while [[ ! $col_name =~  ^[a-zA-Z]+[a-zA-Z0-9]*$ ]] || [[ $col_name == '' ]]
            do
@@ -149,7 +143,8 @@ function insert {
         read col_value;
   
         if [[ ( $col_type = "int" && "$col_value" = +([0-9]) ) || ( $col_type = "string" && "$col_value" = +([a-zA-Z]) ) ]]; then
-          if [[ $i != $nf ]]; then
+          if [[ $i != $nf ]]
+          then
             echo -n $col_value":" >> ./$tableName;
           else	
             echo $col_value >> ./$tableName;
@@ -181,13 +176,13 @@ function deleteFromTable {
   else
     echo -e "Enter Value of columun to delete it's row: \c"
     read val
-    res=$(awk 'BEGIN{FS=":"}{if ($'$fid'=="'$val'") print $'$fid'}' ./$tName 2>>./.error)
+    res=$(awk 'BEGIN{FS=":"}{if ($'$fid'=="'$val'") print $'$fid'}' ./$tName 2>>../../.error)
     if [[ $res == "" ]]
     then
       echo "Value Not Found"
       tableFunctionalities
     else
-      NR=$(awk 'BEGIN{FS=":"}{if ($'$fid'=="'$val'") print NR}' ./$tName 2>>./.error)
+      NR=$(awk 'BEGIN{FS=":"}{if ($'$fid'=="'$val'") print NR}' ./$tName 2>>../../.error)
       sed -i ''$NR'd' ./$tName 2>>./.error
       echo "Row Deleted Successfully"
       tableFunctionalities
@@ -229,6 +224,112 @@ function dropTable
 tableFunctionalities
 
 }
+#---------------------- update table ----------------------#
+
+function updateTable {
+  echo -e "Enter Table Name: \c"
+  read tName
+  echo -e "Enter Column name: \c"
+  read field
+  fid=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$field'") print i}}}' ./$tName)
+  if [[ $fid == "" ]]
+  then
+    echo "Not Found"
+    tableFunctionalities
+  else
+    echo -e "Enter column Value in specific row: \c"
+    read val
+    res=$(awk 'BEGIN{FS=":"}{if ($'$fid'=="'$val'") print $'$fid'}' ./$tName 2>>../../.error)
+    if [[ $res == "" ]]
+    then
+      echo "Value Not Found"
+      tableFunctionalities
+    else
+      echo -e "Enter column name to update it: \c"
+      read setField
+      setFid=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$setField'") print i}}}' ./$tName)
+      if [[ $setFid == "" ]]
+      then
+        echo "Not Found"
+        tableFunctionalities
+      else
+        col_type=`awk -F: -v"i=$setFid" '{if(NR==1){print $i}}' ./$tName.ct;`
+            flag=0;
+      while [[ $flag -eq 0 ]]
+       do
+        echo -e "Enter new Value of column in the row you want to update: \c"
+        read newValue
+        if [[ ( $col_type = "int" && "$newValue" = +([0-9]) ) || ( $col_type = "string" && "$newValue" = +([a-zA-Z]) ) ]]; then
+          NR=$(awk 'BEGIN{FS=":"}{if ($'$fid' == "'$val'") print NR}' ./$tName 2>>../../.error)
+          oldValue=$(awk 'BEGIN{FS=":"}{if(NR=='$NR'){for(i=1;i<=NF;i++){if(i=='$setFid') print $i}}}' ./$tName 2>>../../.error)
+          echo $oldValue
+          sed -i ''$NR's/'$oldValue'/'$newValue'/g' ./$tName 2>>../../.error
+          echo "Row Updated Successfully"
+          tableFunctionalities
+          flag=1;
+        fi
+      done
+      fi
+    fi
+  fi
+}
+
+
+function selectAllRows {
+  echo -e "Enter Table Name: \c"
+  read tName
+  column -t -s ':' ./$tName 2>>./.error
+  if [[ $? != 0 ]]
+  then
+    echo "Error Displaying Table $tName"
+  fi
+  tableFunctionalities
+}
+
+function selectColoumn {
+  echo -e "Enter Table Name: \c"
+  read tName
+  echo -e "Enter Column Number: \c"
+  read colNum
+  awk 'BEGIN{FS=":"}{print $'$colNum'}' ./$tName
+  tableFunctionalities
+}
+
+
+function allColumnsWithCondition {
+  echo -e "Enter Table Name: \c"
+  read tName
+  echo -e "Enter Column name: \c"
+  read field
+  fid=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$field'") print i}}}' ./$tName)
+  if [[ $fid == "" ]]
+  then
+    echo "Not Found"
+   tableFunctionalities
+  else
+    echo -e "\nselect operator: [==, !=, >, <, >=, <=]: \c"
+    read op
+    if [[ $op == "==" ]] || [[ $op == "!=" ]] || [[ $op == ">" ]] || [[ $op == "<" ]] || [[ $op == ">=" ]] || [[ $op == "<=" ]]
+    then
+      echo -e "\nEnter value : \c"
+      read val
+      res=$(awk 'BEGIN{FS=":"}{if ($'$fid$op$val') print $0}' ./$tName 2>>../../.error |  column -t -s ':')
+      if [[ $res == "" ]]
+      then
+        echo "Value Not Found"
+        tableFunctionalities
+      else
+        awk 'BEGIN{FS=":"}{if ($'$fid$op$val') print $0}' ./$tName 2>>../../.error |  column -t -s ':'
+        tableFunctionalities
+      fi
+    else
+      echo "Unsupported Operator\n"
+      tableFunctionalities
+    fi
+  fi
+}
+
+
 
 tableFunctionalities
 
