@@ -40,6 +40,8 @@ function dbMenu {
 ############ create select function to select specific database ###############
 
 function selectDB {
+  echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
+  ls ./databases;
  echo -e "${CYAN}Enter Database Name${ENDCOLOR}: \c"
   read dbName
   cd ./databases/$dbName 2>>./.error
@@ -108,6 +110,8 @@ function renameDB {
 
 #------------------ Drop database function -----------------#
 function dropDB {
+  echo -e "${CYAN}Available database are: ${ENDCOLOR}"
+  ls ./databases;
   echo -e "${CYAN}Enter Database Name:${ENDCOLOR} \c"
   read dbName
 
