@@ -329,7 +329,5 @@ function allColumnsWithCondition {
   fi
 }
 
-
-
 tableFunctionalities
 
