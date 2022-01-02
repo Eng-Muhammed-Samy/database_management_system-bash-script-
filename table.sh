@@ -26,7 +26,7 @@ echo -e "${CYAN}Enter Choice:${ENDCOLOR} \c"
     2)  createTable ;;
     3)  insert;;
     4)  clear; ../../selectFromTable.sh ;;
-    #5)  updateTable;;
+    5)  updateTable;;
     6)  deleteFromTable;;
     7)  dropTable;;
     8) clear;cd ../../ ; ./db.sh 2>>./.error;;
@@ -94,16 +94,6 @@ function createTable {
           done
            
 
-      
-#-----------------------------append columns name and types in their files------#
-        if [[ i -eq cols_num ]]; then
-        echo  $col_name >> ./$tableName;
-        echo  $col_type >> ./$tableName.ct;
-
-        else
-        echo -n $col_name":" >> ./$tableName;
-        echo -n $col_type":" >> ./$tableName.ct;
-        fi
 #----------------------- check valid name column------------#
            while [[ ! $col_name =~  ^[a-zA-Z]+[a-zA-Z0-9]*$ ]] || [[ $col_name == '' ]]
            do
@@ -149,7 +139,8 @@ function insert {
         read col_value;
   
         if [[ ( $col_type = "int" && "$col_value" = +([0-9]) ) || ( $col_type = "string" && "$col_value" = +([a-zA-Z]) ) ]]; then
-          if [[ $i != $nf ]]; then
+          if [[ $i != $nf ]]
+          then
             echo -n $col_value":" >> ./$tableName;
           else	
             echo $col_value >> ./$tableName;
@@ -181,13 +172,13 @@ function deleteFromTable {
   else
     echo -e "Enter Value of columun to delete it's row: \c"
     read val
-    res=$(awk 'BEGIN{FS=":"}{if ($'$fid'=="'$val'") print $'$fid'}' ./$tName 2>>./.error)
+    res=$(awk 'BEGIN{FS=":"}{if ($'$fid'=="'$val'") print $'$fid'}' ./$tName 2>>../../.error)
     if [[ $res == "" ]]
     then
       echo "Value Not Found"
       tableFunctionalities
     else
-      NR=$(awk 'BEGIN{FS=":"}{if ($'$fid'=="'$val'") print NR}' ./$tName 2>>./.error)
+      NR=$(awk 'BEGIN{FS=":"}{if ($'$fid'=="'$val'") print NR}' ./$tName 2>>../../.error)
       sed -i ''$NR'd' ./$tName 2>>./.error
       echo "Row Deleted Successfully"
       tableFunctionalities
@@ -227,6 +218,45 @@ function dropTable
   fi
 
 tableFunctionalities
+
+}
+#---------------------- update table ----------------------#
+function updateTable {
+
+  echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
+  ls -I '*.*';
+  echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
+  read tableName
+
+if [[ -f ./$tableName ]]
+then
+        awk -F: '{if(NR==1){print $0}}' ./$tableName;
+        read -p "Enter column to be updated : " colupd;
+        read -p "Enter new value : " vl;
+        read -p "Enter the column (where) : " wherecl;
+        read -p "Enter the value : "    wherevl;
+        awk -F:  '                                                                                                                            
+        {                                                                                                                                     
+                if(NR==1){                                                                                                                    
+                        for(i=1;i<=NF;i++){                                                                                                   
+                                if($i=="'$colupd'"){var=i}else{if($i=="'$wherecl'"){vaa=i}}                                                   
+                        }                                                                                                                     
+                }                                                                                                                             
+                else{                                                                                                                         
+                        if($vaa=='$wherevl'){                                                                                                 
+                                $var="'$vl'"                                                                                                  
+                        }                                                                                                                     
+                }                                                                                                                             
+                {print}                                                                                                                       
+        }' ./$tableName > tmp && mv tmp ./$tableName;
+
+else
+        echo "$tableName doesn't exist";
+fi
+
+
+
+
 
 }
 
