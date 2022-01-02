@@ -46,12 +46,12 @@ function createTable {
    echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
    read tableName
    clear
-  #-------------- check valid table name -------#
+ #-------------- check valid table name -----------------------#
     if [[ ! $tableName =~  ^[a-zA-Z]+[a-zA-Z0-9]*$ ]] || [[ $tableName == '' ]]
     then
         echo -e "${RED}Not a Valid Name for Table${ENDCOLOR}"
         createTable 
-    #-------------- check if table is exist---#
+  #-------------- check if table is exist----------------------#
     elif [[ -f ./$tableName ]]
     then
         echo -e "${YELLO}Table Already Exist${ENDCOLOR}"
@@ -59,10 +59,10 @@ function createTable {
     else
       
         touch ./$tableName
-  #------------ ask user for columns numbers ----------#
+  #------------ ask user for columns numbers ----------------#
         echo -e "${CYAN}Enter No of columns : ${ENDCOLOR} \c"
         read cols_num
- #---------------- check if colnum > 2-----------#
+ #---------------- check if colnum > 2----------------------#
         until [[ $cols_num =~ ^[2-9]+$ ]]
         do
             echo -e "${RED}Table Should Have at Least Two Column, String not allowed${ENDCOLOR}\c"
@@ -70,7 +70,7 @@ function createTable {
             read cols_num
             clear
         done
-#--------------------- enter columns name ------#
+#--------------------- enter columns name ----------------#
 
         for (( i = 1; i <= cols_num; i++ )); 
         do
@@ -83,29 +83,26 @@ function createTable {
                 echo -e "${RED}Not a Valid Name for column${ENDCOLOR}"; 
                 read col_name;
           done  
-        #   flag=0;
-        #   typeset -i nf=`awk -F: '{if(NR==1){print NF}}' ./$tableName`;
+      
      
-    #------------------ask user for column type----------------------#
+#------------------ask user for column type----------------------#
        echo -e "${CYAN}Enter column datatype :${ENDCOLOR} ${YELLO}[string/int]${ENDCOLOR} : \c";
         read  col_type;
-      #-------------------- check type entered correctly----------#
+#-------------------- check type entered correctly---------------#
           while [[ "$col_type" != *(int)*(string) || -z "$col_type" ]]
           do
             echo -e "${RED}Invalid datatype${ENDCOLOR}";
             echo -e "${CYAN}Enter column datatype :${ENDCOLOR} ${YELLO}[string/int]${ENDCOLOR} : \c";
             read  col_type;
           done
-           
-
-#----------------------- check valid name column------------#
+#----------------------- check valid name column----------------#
            while [[ ! $col_name =~  ^[a-zA-Z]+[a-zA-Z0-9]*$ ]] || [[ $col_name == '' ]]
            do
                 echo -e "${RED}Not a Valid Name for column${ENDCOLOR}"; 
                 read col_name;
           done  
       
-#-----------------------------append columns name and types in their files------#
+#----------------------- append columns name and types in their files------#
           if [[ i -eq cols_num ]]; then
             echo  $col_name >>./$tableName;
             echo  $col_type >> ./$tableName.ct;
@@ -116,14 +113,13 @@ function createTable {
           fi
 
     done
-      echo "$tableName has been created"
+      echo -e "${YELLO}$tableName${ENDCOLOR} ${BLUE}has been created${ENDCOLOR}"
   fi    
   tableFunctionalities
 }
-#--------------------------- create insert functon --------------------#
+
+#---------------------------  insert functon --------------------#
 function insert {
-
-
   echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
   ls -I '*.*';
   echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
@@ -155,45 +151,47 @@ function insert {
     done
     
   else
-    echo "$tableName doesn't exist";
+    echo -e "${YELLO}$tableName${ENDCOLOR} ${RED}doesn't exist${ENDCOLOR}";
   fi
-
-
 tableFunctionalities
 }
+#--------------------------- delete from table functon --------------------#
 
 function deleteFromTable {
-  echo -e "Enter Table Name: \c"
+  echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
+  ls -I '*.*';
+  echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
   read tName
-  echo -e "Enter Column name: \c"
+  echo -e "${CYAN}Enter column Name : ${ENDCOLOR} \c"
   read field
   fid=$(awk 'BEGIN{FS=":"}{if(NR==1)
   {for(i=1;i<=NF;i++){if($i=="'$field'") print i}}}' ./$tName)
   if [[ $fid == "" ]]
   then
-    echo "Not Found"
+    echo -e "${YELLO}$field${ENDCOLOR}${RED} column doesn't exist${ENDCOLOR}";
     tableFunctionalities
   else
-    echo -e "Enter Value of columun to delete it's row: \c"
+    echo -e "${CYAN}Enter Value of columun to delete it's row: ${ENDCOLOR}\c"
     read val
     res=$(awk 'BEGIN{FS=":"}{if ($'$fid'=="'$val'") print $'$fid'}' ./$tName 2>>../../.error)
     if [[ $res == "" ]]
     then
-      echo "Value Not Found"
+      echo -e "${RED}Value Not Found${ENDCOLOR}"
       tableFunctionalities
     else
       NR=$(awk 'BEGIN{FS=":"}{if ($'$fid'=="'$val'") print NR}' ./$tName 2>>../../.error)
       sed -i ''$NR'd' ./$tName 2>>./.error
-      echo "Row Deleted Successfully"
+      echo -e "${BLUE}Row Deleted Successfully${ENDCOLOR}"
       tableFunctionalities
     fi
   fi
+  tableFunctionalities
 }
 
 
 
 
-#---------------------------- create drop table function -------------------#
+#----------------------------  drop table function -------------------#
 function dropTable 
 {
   echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
@@ -224,47 +222,51 @@ function dropTable
 tableFunctionalities
 
 }
-#---------------------- update table ----------------------#
+
+#---------------------- update table ----------------------------------#
 
 function updateTable {
-  echo -e "Enter Table Name: \c"
+  echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
+  ls -I '*.*';
+  echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
   read tName
-  echo -e "Enter Column name: \c"
+  echo -e "${CYAN}Enter condition column Name : ${ENDCOLOR} \c"
   read field
   fid=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$field'") print i}}}' ./$tName)
   if [[ $fid == "" ]]
   then
-    echo "Not Found"
+    echo -e "${YELLO}$field${ENDCOLOR}${RED} column doesn't exist${ENDCOLOR}";
     tableFunctionalities
   else
-    echo -e "Enter column Value in specific row: \c"
+    echo -e "${CYAN}Enter condition column Value in specific row: ${ENDCOLOR}\c"
     read val
     res=$(awk 'BEGIN{FS=":"}{if ($'$fid'=="'$val'") print $'$fid'}' ./$tName 2>>../../.error)
     if [[ $res == "" ]]
     then
-      echo "Value Not Found"
+      echo -e "${RED}Value Not Found${ENDCOLOR}"
       tableFunctionalities
     else
-      echo -e "Enter column name to update it: \c"
+      echo -e "${CYAN}Enter column name to update it: ${ENDCOLOR}\c"
       read setField
       setFid=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$setField'") print i}}}' ./$tName)
       if [[ $setFid == "" ]]
       then
-        echo "Not Found"
+        echo -e "${YELLO}$setField${ENDCOLOR}${RED} column doesn't exist${ENDCOLOR}";
         tableFunctionalities
       else
         col_type=`awk -F: -v"i=$setFid" '{if(NR==1){print $i}}' ./$tName.ct;`
             flag=0;
       while [[ $flag -eq 0 ]]
        do
-        echo -e "Enter new Value of column in the row you want to update: \c"
+        echo -e "${CYAN}Enter new Value of column in the row you want to update: ${ENDCOLOR}\c"
         read newValue
-        if [[ ( $col_type = "int" && "$newValue" = +([0-9]) ) || ( $col_type = "string" && "$newValue" = +([a-zA-Z]) ) ]]; then
+        if [[ ( $col_type = "int" && "$newValue" = +([0-9]) ) || ( $col_type = "string" && "$newValue" = +([a-zA-Z]) ) ]]
+        then
           NR=$(awk 'BEGIN{FS=":"}{if ($'$fid' == "'$val'") print NR}' ./$tName 2>>../../.error)
           oldValue=$(awk 'BEGIN{FS=":"}{if(NR=='$NR'){for(i=1;i<=NF;i++){if(i=='$setFid') print $i}}}' ./$tName 2>>../../.error)
-          echo $oldValue
+          #echo $oldValue
           sed -i ''$NR's/'$oldValue'/'$newValue'/g' ./$tName 2>>../../.error
-          echo "Row Updated Successfully"
+          echo -e "${BLUE}Row Updated Successfully${ENDCOLOR}"
           tableFunctionalities
           flag=1;
         fi
@@ -272,61 +274,71 @@ function updateTable {
       fi
     fi
   fi
+  tableFunctionalities
 }
 
-
+#--------------------------- select all rows function ---------------------#
 function selectAllRows {
-  echo -e "Enter Table Name: \c"
+  echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
+  ls -I '*.*';
+  echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
   read tName
   column -t -s ':' ./$tName 2>>./.error
   if [[ $? != 0 ]]
   then
-    echo "Error Displaying Table $tName"
+    echo -e "${RED}Error Displaying Table${ENDCOLOR}${YELLO} $tName ${ENDCOLOR}"
   fi
   tableFunctionalities
 }
 
+#--------------------------- select specific column function ---------------------#
 function selectColoumn {
-  echo -e "Enter Table Name: \c"
+  echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
+  ls -I '*.*';
+  echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
   read tName
-  echo -e "Enter Column Number: \c"
+  echo -e "${CYAN}Enter Column Number: ${ENDCOLOR} \c"
   read colNum
   awk 'BEGIN{FS=":"}{print $'$colNum'}' ./$tName
   tableFunctionalities
 }
 
+#--------------------------- select rows with condition function ---------------------#
 
 function allColumnsWithCondition {
-  echo -e "Enter Table Name: \c"
+   echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
+  ls -I '*.*';
+  echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
   read tName
-  echo -e "Enter Column name: \c"
+  echo -e "${CYAN}Enter Column name: ${ENDCOLOR}\c"
   read field
   fid=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$field'") print i}}}' ./$tName)
   if [[ $fid == "" ]]
   then
-    echo "Not Found"
+        echo -e "${YELLO}$field${ENDCOLOR} ${RED}column doesn't exist${ENDCOLOR}";
    tableFunctionalities
   else
-    echo -e "\nselect operator: [==, !=, >, <, >=, <=]: \c"
+    echo -e "\n${CYAN}select operator: [==, !=, >, <, >=, <=]: ${ENDCOLOR}\c"
     read op
     if [[ $op == "==" ]] || [[ $op == "!=" ]] || [[ $op == ">" ]] || [[ $op == "<" ]] || [[ $op == ">=" ]] || [[ $op == "<=" ]]
     then
-      echo -e "\nEnter value : \c"
+      echo -e "\n${CYAN}Enter value : ${ENDCOLOR}\c"
       read val
       res=$(awk 'BEGIN{FS=":"}{if ($'$fid$op$val') print $0}' ./$tName 2>>../../.error |  column -t -s ':')
       if [[ $res == "" ]]
       then
-        echo "Value Not Found"
+        echo -e "${RED}Value Not Found${ENDCOLOR}"
         tableFunctionalities
       else
         awk 'BEGIN{FS=":"}{if ($'$fid$op$val') print $0}' ./$tName 2>>../../.error |  column -t -s ':'
         tableFunctionalities
       fi
     else
-      echo "Unsupported Operator\n"
+      echo -e "${RED}Unsupported Operator\n${ENDCOLOR}"
       tableFunctionalities
     fi
   fi
+  tableFunctionalities
 }
 
 tableFunctionalities
