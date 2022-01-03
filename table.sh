@@ -232,21 +232,30 @@ function deleteFromTable {
 #----------------------------  drop table function -------------------#
 function dropTable 
 {
+  #-------------------- show available tables in selected database -------------#
   echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
   ls -I '*.*';
+  #-------------- ask user to enter table name ---#
   echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
-   read tableName
+  #------------- catch the table entered in tableName variable ----------------#
+  read tableName
+   #-------------------- check if table  exists -----------------#
   if [[ -f ./$tableName ]]
   then
+  #-------------- ask user if he sure to drop that table and ask him to enter yes if he sure and no if he didnot sure----------#
     echo -e "${RED}Are you Sure You Want To drop${ENDCOLOR} ${YELLO}$tableName${ENDCOLOR} ${RED}table? y/n${ENDCOLOR}"
+  #------------- catch the input in choice variable------------------#
     read choice;
+  #----------- case condition --------------------------#
     case $choice in
       [Yy]* ) 
+      #----------- if yes delete the table enterd the file of data and type -----#
         rm ./$tableName
         rm ./$tableName.ct
         echo -e "${YELLO}$tableName ${ENDCOLOR} ${BLUE}has been deleted${ENDCOLOR}"
         ;;
       [Nn]* ) 
+      #----------- if no dcanceled operation------------------#
         echo -e "${BLUE}Operation Canceled${ENDCOLOR}"
         ;;
       * ) 
@@ -254,6 +263,8 @@ function dropTable
         ;;
     esac
   else
+    #-------------------- if table doesnot exist tell user meaasage doexnot exist ----------#
+
     echo -e "${YELLO}$tableName ${ENDCOLOR} ${BLUE} doesn't exist${ENDCOLOR}"
   fi
 
