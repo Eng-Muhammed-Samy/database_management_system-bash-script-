@@ -120,31 +120,42 @@ function createTable {
 
 #---------------------------  insert functon --------------------#
 function insert {
+  #-------------------- show available tables in selected database -------------#
   echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
   ls -I '*.*';
+  #--------------------- ask user to enter table name -------------------------#
   echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
   read tableName
+  #-------------------- check if table  exists -----------------#
   if [[ -f ./$tableName ]]
   then
+  #-------------------- catch the number of columns in the table -----------#
     typeset -i nf=`awk -F: '{if(NR==1){print NF}}' ./$tableName;`
-    
+  #--------------------- loop on the number of columns ---------------------# 
     for (( i = 1; i <= $nf; i++ ))
     do
+  #----------------------- catch the column name and the type of this column in each itreration--------#
       col_name=`awk -F: -v"i=$i" '{if(NR==1){print $i}}' ./$tableName;`
       col_type=`awk -F: -v"i=$i" '{if(NR==1){print $i}}' ./$tableName.ct;`
+  #--------------------- set flag to use it to out from while loop --------------------#
       flag=0;
       while [[ $flag -eq 0 ]]
        do
+  #----------------------- ask user to insert the value of each column ---------------#
         echo -e "${CYAN}Enter $col_name :${ENDCOLOR} \c" ;
         read col_value;
-  
+  #-----------------------check the value match the type ---------------------------------#
         if [[ ( $col_type = "int" && "$col_value" = +([0-9]) ) || ( $col_type = "string" && "$col_value" = +([a-zA-Z]) ) ]]; then
+  #---------------------- if the number of iteration not equal number of fields------------#
           if [[ $i != $nf ]]
           then
+  #--------------------- insert the value in the column use -n to insert in the same row ----#
             echo -n $col_value":" >> ./$tableName;
           else	
+  #-------------------- insert the value in the column if it is the last value -------------#
             echo $col_value >> ./$tableName;
           fi
+  #------------------ set flag = 1 to out from the while loop if the insert process is correct----#
           flag=1;
         fi
       done
