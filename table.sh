@@ -118,6 +118,7 @@ function createTable {
   tableFunctionalities
 }
 
+
 #---------------------------  insert functon --------------------#
 function insert {
   #-------------------- show available tables in selected database -------------#
@@ -162,39 +163,65 @@ function insert {
     done
     
   else
+  #-------------------- if table doesnot exist tell user meaasage doexnot exist ----------#
     echo -e "${YELLO}$tableName${ENDCOLOR} ${RED}doesn't exist${ENDCOLOR}";
   fi
 tableFunctionalities
 }
-#--------------------------- delete from table functon --------------------#
 
+
+
+#--------------------------- delete from table functon --------------------#
 function deleteFromTable {
+  #-------------------- show available tables in selected database -------------#
   echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
   ls -I '*.*';
+  #-------------- ask user to enter table name ---#
   echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
+  #------------- catch the table entered in tname variable ----------------#
   read tName
+  #-------------------- check if table  exists -----------------#
+  if [[ -f ./$tableName ]]
+  then
+  #-------------- ask user to enter column name ---#
   echo -e "${CYAN}Enter column Name : ${ENDCOLOR} \c"
+  #------------- catch the column name entered in field variable ----------------#
   read field
+  #------------- catch the number of the column name enterd in the fid variable---------#
   fid=$(awk 'BEGIN{FS=":"}{if(NR==1)
-  {for(i=1;i<=NF;i++){if($i=="'$field'") print i}}}' ./$tName)
+  {for(i=1;i<=NF;i++){if($i=="'$field'") print i}}}' ./$tName)table
+  #-------------- if the fid is empty ----------------------------------------#
   if [[ $fid == "" ]]
   then
+  #--------------- show message column name doesnot exist------------------#
     echo -e "${YELLO}$field${ENDCOLOR}${RED} column doesn't exist${ENDCOLOR}";
     tableFunctionalities
   else
+  #------------- if the fid equal a number then ask the user to enter the value of the column name in the row he want to delete it ----#
     echo -e "${CYAN}Enter Value of columun to delete it's row: ${ENDCOLOR}\c"
+  #------------- catch the column value entered in val variable ----------------# 
     read val
+  #-------------- check the value entered exist in some row if exist catch the value in res variable------------------#
     res=$(awk 'BEGIN{FS=":"}{if ($'$fid'=="'$val'") print $'$fid'}' ./$tName 2>>../../.error)
+  
     if [[ $res == "" ]]
     then
+  #---------------- if res is empty show message value not found ---------------#
       echo -e "${RED}Value Not Found${ENDCOLOR}"
       tableFunctionalities
     else
+  #--------------- catch the record number of the value to delete that row ----------#
       NR=$(awk 'BEGIN{FS=":"}{if ($'$fid'=="'$val'") print NR}' ./$tName 2>>../../.error)
-      sed -i ''$NR'd' ./$tName 2>>./.error
+  #-------------- delete the row using sed -----------------------------#
+      sed -i ''$NR'd' ./$tName 2>>../../.error
+  #-------------- after deleted success show message ------------------#
       echo -e "${BLUE}Row Deleted Successfully${ENDCOLOR}"
       tableFunctionalities
     fi
+  fi
+  else
+  #-------------------- if table doesnot exist tell user meaasage doexnot exist ----------#
+    echo -e "${YELLO}$tableName${ENDCOLOR} ${RED}doesn't exist${ENDCOLOR}";
   fi
   tableFunctionalities
 }
