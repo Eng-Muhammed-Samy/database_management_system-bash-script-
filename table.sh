@@ -8,19 +8,19 @@ CYAN="\e[96m"
 
 #--------------- table menu --------------# 
 function tableFunctionalities {
-echo -e "\n+--------Tables Menu------------+"
-echo -e " ${GREEN}| 1. Show Existing Tables        |${ENDCOLOR} "
-echo -e " ${GREEN}| 2. Create New Table            |${ENDCOLOR} "
-echo -e " ${GREEN}| 3. Insert Into Table           |${ENDCOLOR} "
-echo -e " ${GREEN}| 4. Select All Rows From Table  |${ENDCOLOR} "
-echo -e " ${GREEN}| 5. Select column               |${ENDCOLOR} "
-echo -e " ${GREEN}| 6. Select With condition       |${ENDCOLOR} "
-echo -e " ${GREEN}| 7. Update Table                |${ENDCOLOR} "
-echo -e " ${GREEN}| 8. Delete From Table           |${ENDCOLOR} "
-echo -e " ${GREEN}| 9. Drop Table                  |${ENDCOLOR} "
-echo -e " ${GREEN}| 10. Back To database Menu      |${ENDCOLOR} "
-echo -e " ${GREEN}| 11. Exit                       |${ENDCOLOR} "
-echo "+-------------------------------+"
+echo -e "\n\n${YELLO}*--------Tables Menu------------*${ENDCOLOR}"
+echo -e " ${GREEN} 1. Display Existing Tables     ${ENDCOLOR} "
+echo -e " ${GREEN} 2. ADD New Table               ${ENDCOLOR} "
+echo -e " ${GREEN} 3. Insert Into Table           ${ENDCOLOR} "
+echo -e " ${GREEN} 4. Select All Rows From Table  ${ENDCOLOR} "
+echo -e " ${GREEN} 5. Select column               ${ENDCOLOR} "
+echo -e " ${GREEN} 6. Select Rows With condition  ${ENDCOLOR} "
+echo -e " ${GREEN} 7. Update Table                ${ENDCOLOR} "
+echo -e " ${GREEN} 8. Delete From Table           ${ENDCOLOR} "
+echo -e " ${GREEN} 9. Drop Table                  ${ENDCOLOR} "
+echo -e " ${GREEN} 10. Back To DB Menu            ${ENDCOLOR} "
+echo -e " ${GREEN} 11. Exit                       ${ENDCOLOR} "
+echo -e "${YELLO}*-------------------------------*${ENDCOLOR}\n\n"
 echo -e "${CYAN}Enter Choice:${ENDCOLOR} \c"
   read ch
   case $ch in
@@ -29,7 +29,7 @@ echo -e "${CYAN}Enter Choice:${ENDCOLOR} \c"
     3)  insert;;
     4)  clear; selectAllRows;;
     5)  clear; selectColoumn;;
-    6)  clear; allColumnsWithCondition;;
+    6)  clear; allRowsWithCondition;;
     7)  updateTable;;
     8)  deleteFromTable;;
     9)  dropTable;;
@@ -181,15 +181,19 @@ function deleteFromTable {
   #------------- catch the table entered in tname variable ----------------#
   read tName
   #-------------------- check if table  exists -----------------#
-  if [[ -f ./$tableName ]]
+  if [[ -f ./$tName ]]
   then
+  #-------------------- show available columns in selected table -------------#
+    echo -e "${CYAN}there are the columns available in the table : ${ENDCOLOR}"
+    row=$(awk 'BEGIN{FS=":"}{if (NR==1) print $0}' ./$tName);
+    echo -e "${YELLO}$row${ENDCOLOR}";
   #-------------- ask user to enter column name ---#
   echo -e "${CYAN}Enter column Name : ${ENDCOLOR} \c"
   #------------- catch the column name entered in field variable ----------------#
   read field
   #------------- catch the number of the column name enterd in the fid variable---------#
   fid=$(awk 'BEGIN{FS=":"}{if(NR==1)
-  {for(i=1;i<=NF;i++){if($i=="'$field'") print i}}}' ./$tName)table
+  {for(i=1;i<=NF;i++){if($i=="'$field'") print i}}}' ./$tName)
   #-------------- if the fid is empty ----------------------------------------#
   if [[ $fid == "" ]]
   then
@@ -337,7 +341,10 @@ function selectAllRows {
   #-------------------- check if table  exists -----------------#
   if [[ -f ./$tName ]]
   then
-    column -t -s ':' ./$tName 2>>./.error
+  #column --> display the content in file
+  # -t --> determine the number of column to display, -s --> defines columns delemeter
+   allrow=$(column -t -s ':' ./$tName 2>>../../.error);
+   echo -e "${YELLO}$allrow${ENDCOLOR}";
   else
     #-------------------- if table doesnot exist tell user meaasage doexnot exist ----------#
     echo -e "${YELLO}$tName ${ENDCOLOR} ${BLUE} doesn't exist${ENDCOLOR}"
@@ -360,7 +367,8 @@ function selectColoumn {
   then
   #-------------------- show available columns in selected table -------------#
     echo -e "${CYAN}there are the columns available in the table : ${ENDCOLOR}"
-    awk 'BEGIN{FS=":"}{if (NR==1) print $0}' ./$tName
+    row=$(awk 'BEGIN{FS=":"}{if (NR==1) print $0}' ./$tName);
+    echo -e "${YELLO}$row${ENDCOLOR}";
   #---------------------- ask user to enter the column number that he want to select ----#
     echo -e "${CYAN}Enter Column Number: ${ENDCOLOR} \c"
     read colNum
@@ -386,10 +394,10 @@ function selectColoumn {
 
 #--------------------------- select rows with condition function ---------------------#
 
-function allColumnsWithCondition {
+function allRowsWithCondition {
   #-------------------- show available tables in selected database -------------#
   echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
-  ls -I '*.*';
+  ls -I '*.*'; 
   #-------------- ask user to enter table name ------------------#
   echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
   #------------- catch the table entered in tName variable ----------------#
@@ -397,16 +405,20 @@ function allColumnsWithCondition {
   #-------------------- check if table  exists -----------------#
   if [[ -f ./$tName ]]
   then
+  #--------------------- display all column name -----------------#
+    echo -e "${CYAN}there are the columns available in the table : ${ENDCOLOR}"
+    row=$(awk 'BEGIN{FS=":"}{if (NR==1) print $0}' ./$tName);
+    echo -e "${YELLO}$row${ENDCOLOR}";
   #-------------- ask user to enter column name ---#
     echo -e "${CYAN}Enter Column name: ${ENDCOLOR}\c"
-  #------------- catch the column name in the field variable----------#
-    read field
-  #------------- check that the column name is exist and return the field number in fid variable------------------#
-    fid=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$field'") print i}}}' ./$tName)
+  #------------- catch the column name in the colName variable----------#
+    read colName
+  #------------- check that the column name is exist and return the colName number in fid variable------------------#
+    fid=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$colName'") print i}}}' ./$tName)
   #--------------- if fid doesnot have value  then column name doesnot exist-------#
     if [[ $fid == "" ]]
     then
-          echo -e "${YELLO}$field${ENDCOLOR} ${RED}column doesn't exist${ENDCOLOR}";
+          echo -e "${YELLO}$colName${ENDCOLOR} ${RED}column doesn't exist${ENDCOLOR}";
     tableFunctionalities
     else
     #-------------------- ask user to enter the operation for condition-----------------#
@@ -427,8 +439,10 @@ function allColumnsWithCondition {
           echo -e "${RED}Value Not Found${ENDCOLOR}"
           tableFunctionalities
         else
+        
         #------------ print the result-------------#
-          awk 'BEGIN{FS=":"}{if ($'$fid$op$val') print $0}' ./$tName 2>>../../.error |  column -t -s ':'
+          col=$(awk 'BEGIN{FS=":"}{if ($'$fid$op$val') print $0}' ./$tName 2>>../../.error |  column -t -s ':')
+          echo -e "${YELLO}$col${ENDCOLOR}"
           tableFunctionalities
         fi
       else
