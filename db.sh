@@ -14,14 +14,15 @@ CYAN="\e[96m"
 
 #---------------------- database menu----------------------#
 function dbMenu {
-  echo -e "\n*-------DB Menu--------*"
-  echo -e " ${GREEN}| 1. Select Database |${ENDCOLOR} "
-  echo -e " ${GREEN}| 2. Create Database |${ENDCOLOR} "
-  echo -e " ${GREEN}| 3. Rename Database |${ENDCOLOR} "
-  echo -e " ${GREEN}| 4. Drop Database   |${ENDCOLOR} "
-  echo -e " ${GREEN}| 5. Show Database   |${ENDCOLOR} "
-  echo -e " ${GREEN}| 6. Exit            |${ENDCOLOR} "
-  echo -e "*----------------------*"
+  # -e --> enables the interpretation of backslash escapes
+  echo -e "\n\n${YELLO}*-------DB Menu--------*${ENDCOLOR}"
+  echo -e " ${GREEN} 1. Select Database    ${ENDCOLOR} "
+  echo -e " ${GREEN} 2. Create Database    ${ENDCOLOR} "
+  echo -e " ${GREEN} 3. Rename Database    ${ENDCOLOR} "
+  echo -e " ${GREEN} 4. Drop Database      ${ENDCOLOR} "
+  echo -e " ${GREEN} 5. Show Database      ${ENDCOLOR} "
+  echo -e " ${GREEN} 6. Exit               ${ENDCOLOR} "
+  echo -e "${YELLO}*----------------------*${ENDCOLOR}\n\n"
   echo -e "${CYAN}Enter YOUR Choice: ${ENDCOLOR}\c"                            
   read ch
   case $ch in
