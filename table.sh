@@ -264,7 +264,6 @@ function dropTable
     esac
   else
     #-------------------- if table doesnot exist tell user meaasage doexnot exist ----------#
-
     echo -e "${YELLO}$tableName ${ENDCOLOR} ${BLUE} doesn't exist${ENDCOLOR}"
   fi
 
@@ -328,28 +327,61 @@ function updateTable {
 
 #--------------------------- select all rows function ---------------------#
 function selectAllRows {
+  #-------------------- show available tables in selected database -------------#
   echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
   ls -I '*.*';
+  #-------------- ask user to enter table name ---#
   echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
+    #------------- catch the table entered in tName variable ----------------#
   read tName
-  column -t -s ':' ./$tName 2>>./.error
-  if [[ $? != 0 ]]
+  #-------------------- check if table  exists -----------------#
+  if [[ -f ./$tName ]]
   then
-    echo -e "${RED}Error Displaying Table${ENDCOLOR}${YELLO} $tName ${ENDCOLOR}"
+    column -t -s ':' ./$tName 2>>./.error
+  else
+    #-------------------- if table doesnot exist tell user meaasage doexnot exist ----------#
+    echo -e "${YELLO}$tName ${ENDCOLOR} ${BLUE} doesn't exist${ENDCOLOR}"
   fi
+
   tableFunctionalities
 }
 
 #--------------------------- select specific column function ---------------------#
 function selectColoumn {
+  #-------------------- show available tables in selected database -------------#
   echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
   ls -I '*.*';
+    #-------------- ask user to enter table name ---#
   echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
+  #------------- catch the table entered in tName variable ----------------#
   read tName
-  echo -e "${CYAN}Enter Column Number: ${ENDCOLOR} \c"
-  read colNum
-  awk 'BEGIN{FS=":"}{print $'$colNum'}' ./$tName
+  #-------------------- check if table  exists -----------------#
+  if [[ -f ./$tName ]]
+  then
+  #-------------------- show available columns in selected table -------------#
+    echo -e "${CYAN}there are the columns available in the table : ${ENDCOLOR}"
+    awk 'BEGIN{FS=":"}{if (NR==1) print $0}' ./$tName
+  #---------------------- ask user to enter the column number that he want to select ----#
+    echo -e "${CYAN}Enter Column Number: ${ENDCOLOR} \c"
+    read colNum
+    #------------- catch the number of columns in NF----------#
+    NF=$(awk 'BEGIN{FS=":"}{if (NR==1) print NF}' ./$tName 2>>../../.error)
+    #-------------- ask user to enter the column number again if he entered column number that isnot exist---#
+    while [[ $colNum -gt $NF || $colNum -eq 0 ]]
+    do
+    echo -e "${CYAN}Enter Column Number: ${ENDCOLOR} \c"
+     read colNum
+     NR=$(awk 'BEGIN{FS=":"}{if (NR==1) print NF}' ./$tName 2>>../../.error)
+    done
+    #------------- print the column-----------------#
+    awk 'BEGIN{FS=":"}{print $'$colNum'}' ./$tName
+  else
+    #-------------------- if table doesnot exist tell user meaasage doexnot exist ----------#
+    echo -e "${YELLO}$tName ${ENDCOLOR} ${BLUE} doesn't exist${ENDCOLOR}"
+  fi
+
   tableFunctionalities
+  
 }
 
 #--------------------------- select rows with condition function ---------------------#
