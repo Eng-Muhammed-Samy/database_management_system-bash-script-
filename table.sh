@@ -278,53 +278,80 @@ tableFunctionalities
 #---------------------- update table ----------------------------------#
 
 function updateTable {
+  #-------------------- show available tables in selected database -------------#
   echo -e "${CYAN}Available tables are: ${ENDCOLOR}"
   ls -I '*.*';
+  #-------------- ask user to enter table name -----------------#
   echo -e "${CYAN}Enter Table Name : ${ENDCOLOR} \c"
+  #------------- catch the table entered in tName variable ----------------#
   read tName
-  echo -e "${CYAN}Enter condition column Name : ${ENDCOLOR} \c"
-  read field
-  fid=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$field'") print i}}}' ./$tName)
-  if [[ $fid == "" ]]
+  #-------------------- check if table  exists -----------------#
+  if [[ -f ./$tName ]]
   then
-    echo -e "${YELLO}$field${ENDCOLOR}${RED} column doesn't exist${ENDCOLOR}";
-    tableFunctionalities
-  else
-    echo -e "${CYAN}Enter condition column Value in specific row: ${ENDCOLOR}\c"
-    read val
-    res=$(awk 'BEGIN{FS=":"}{if ($'$fid'=="'$val'") print $'$fid'}' ./$tName 2>>../../.error)
-    if [[ $res == "" ]]
-    then
-      echo -e "${RED}Value Not Found${ENDCOLOR}"
-      tableFunctionalities
-    else
-      echo -e "${CYAN}Enter column name to update it: ${ENDCOLOR}\c"
-      read setField
-      setFid=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$setField'") print i}}}' ./$tName)
-      if [[ $setFid == "" ]]
+    #-------------- ask user to enter the column name ----------------------#
+      echo -e "${CYAN}Enter condition column Name : ${ENDCOLOR} \c"
+    #--------------- receive the column name in the colName variable-------------#
+      read colName
+    #------------- check that the column name is exist and return the colName number in fid variable------------------#
+      fid=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$colName'") print i}}}' ./$tName)
+    #--------------- if fid doesnot have value  then column name doesnot exist-------#
+      if [[ $fid == "" ]]
       then
-        echo -e "${YELLO}$setField${ENDCOLOR}${RED} column doesn't exist${ENDCOLOR}";
+        echo -e "${YELLO}$field${ENDCOLOR}${RED} column doesn't exist${ENDCOLOR}";
         tableFunctionalities
       else
-        col_type=`awk -F: -v"i=$setFid" '{if(NR==1){print $i}}' ./$tName.ct;`
-            flag=0;
-      while [[ $flag -eq 0 ]]
-       do
-        echo -e "${CYAN}Enter new Value of column in the row you want to update: ${ENDCOLOR}\c"
-        read newValue
-        if [[ ( $col_type = "int" && "$newValue" = +([0-9]) ) || ( $col_type = "string" && "$newValue" = +([a-zA-Z]) ) ]]
+    #--------------- ask user to enter the column value of the column name he entered in the row he want to update it ----#
+        echo -e "${CYAN}Enter condition column Value in specific row: ${ENDCOLOR}\c"
+    #-------------- receive the column value in the val variable -------------------#
+        read val
+    #-------------check if the value entered by the user in the column he specify and catch the value in res variable -----#
+        res=$(awk 'BEGIN{FS=":"}{if ($'$fid'=="'$val'") print $'$fid'}' ./$tName 2>>../../.error)
+    #--------------- if res doesnot have value  then value not found-------#
+        if [[ $res == "" ]]
         then
-          NR=$(awk 'BEGIN{FS=":"}{if ($'$fid' == "'$val'") print NR}' ./$tName 2>>../../.error)
-          oldValue=$(awk 'BEGIN{FS=":"}{if(NR=='$NR'){for(i=1;i<=NF;i++){if(i=='$setFid') print $i}}}' ./$tName 2>>../../.error)
-          #echo $oldValue
-          sed -i ''$NR's/'$oldValue'/'$newValue'/g' ./$tName 2>>../../.error
-          echo -e "${BLUE}Row Updated Successfully${ENDCOLOR}"
+          echo -e "${RED}Value Not Found${ENDCOLOR}"
           tableFunctionalities
-          flag=1;
+        else
+    #----------------- else ask user to enter the column name he want to update-----#
+          echo -e "${CYAN}Enter column name to update it: ${ENDCOLOR}\c"
+    #----------------- receive the column name in setField variable ----------------#
+          read setField
+    #------------- check that the column name is exist and return the colName number in setFid variable------------------#
+          setFid=$(awk 'BEGIN{FS=":"}{if(NR==1){for(i=1;i<=NF;i++){if($i=="'$setField'") print i}}}' ./$tName)
+    #--------------- if setFid doesnot have value  then column name doesnot exist-------#  
+          if [[ $setFid == "" ]]
+          then
+            echo -e "${YELLO}$setField${ENDCOLOR}${RED} column doesn't exist${ENDCOLOR}";
+            tableFunctionalities
+          else
+    #-------------- else catch the column type of the column name entered in col_type variable -----------#
+          col_type=`awk -F: -v"i=$setFid" '{if(NR==1){print $i}}' ./$tName.ct;`
+          flag=0;
+          while [[ $flag -eq 0 ]]
+          do
+    #--------------- ask the user to enter the new value of the column name in the specified row which match the type of col_type-----#
+            echo -e "${CYAN}Enter new Value of column in the row you want to update: ${ENDCOLOR}\c"
+            read newValue
+            if [[ ( $col_type = "int" && "$newValue" = +([0-9]) ) || ( $col_type = "string" && "$newValue" = +([a-zA-Z]) ) ]]
+            then
+    # -------------- catch the row he want to update ----------------------------------#
+              NR=$(awk 'BEGIN{FS=":"}{if ($'$fid' == "'$val'") print NR}' ./$tName 2>>../../.error)
+    #-------------- catch the old value -----------------------------------------------#
+              oldValue=$(awk 'BEGIN{FS=":"}{if(NR=='$NR'){for(i=1;i<=NF;i++){if(i=='$setFid') print $i}}}' ./$tName 2>>../../.error)
+              #echo $oldValue
+    #---------------- replace the old value with the new value ---------#
+              sed -i ''$NR's/'$oldValue'/'$newValue'/g' ./$tName 2>>../../.error
+              echo -e "${BLUE}Row Updated Successfully${ENDCOLOR}"
+              tableFunctionalities
+              flag=1;
+            fi
+          done
+          fi
         fi
-      done
       fi
-    fi
+  else
+    #-------------------- if table doesnot exist tell user meaasage doexnot exist ----------#
+    echo -e "${YELLO}$tName ${ENDCOLOR} ${BLUE} doesn't exist${ENDCOLOR}"
   fi
   tableFunctionalities
 }
@@ -382,7 +409,8 @@ function selectColoumn {
      NR=$(awk 'BEGIN{FS=":"}{if (NR==1) print NF}' ./$tName 2>>../../.error)
     done
     #------------- print the column-----------------#
-    awk 'BEGIN{FS=":"}{print $'$colNum'}' ./$tName
+     col=$(awk 'BEGIN{FS=":"}{print $'$colNum'}' ./$tName)
+      echo -e "${YELLO}$col${ENDCOLOR}"
   else
     #-------------------- if table doesnot exist tell user meaasage doexnot exist ----------#
     echo -e "${YELLO}$tName ${ENDCOLOR} ${BLUE} doesn't exist${ENDCOLOR}"
