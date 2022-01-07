@@ -24,7 +24,7 @@ echo -e "${YELLO}*-------------------------------*${ENDCOLOR}\n\n"
 echo -e "${CYAN}Enter Choice:${ENDCOLOR} \c"
   read ch
   case $ch in
-    1)  ls -I '*.*'; tableFunctionalities ;;
+    1)  showExistingTables;;
     2)  createTable ;;
     3)  insert;;
     4)  clear; selectAllRows;;
@@ -39,6 +39,17 @@ echo -e "${CYAN}Enter Choice:${ENDCOLOR} \c"
   esac
 }
 
+function showExistingTables {
+   existtables=$(ls -I '*.*');
+   if [[ $existtables == '' ]]
+   then
+    echo -e "${YELLO}\n There is no tables in database selected${ENDCOLOR}";
+    tableFunctionalities;
+  else
+    echo -e "${YELLO}Existing tables is/are:\n$existtables${ENDCOLOR}"
+    tableFunctionalities;
+   fi
+}
 
 #------------------- create table function ---------------------#
 function createTable {
@@ -80,7 +91,8 @@ function createTable {
 #----------------------- check valid name column------------#
            while [[ ! $col_name =~  ^[a-zA-Z]+(.*)+[a-zA-Z0-9]*$ ]] || [[ $col_name == '' ]]
            do
-                echo -e "${RED}Not a Valid Name for column${ENDCOLOR}"; 
+                echo -e "${RED}Not a Valid Name for column\n${ENDCOLOR}"; 
+                echo -e "${CYAN}Enter column $i name :${ENDCOLOR} \c" ;
                 read col_name;
           done  
       
@@ -484,6 +496,5 @@ function allRowsWithCondition {
   fi
   tableFunctionalities
 }
-
 tableFunctionalities
 
