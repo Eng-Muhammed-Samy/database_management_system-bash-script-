@@ -161,8 +161,6 @@ function dropDB {
     fi
   dbMenu
 }
-
-
 #---------------- cal function dbmenu------------------------#
 dbMenu
 
